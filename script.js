@@ -1,82 +1,170 @@
+// ====== Data Storage ======
 let tasks = [];
+let taskIdCounter = 0;
+let deletedTask = null;
+let undoTimeout = null;
 
-function renderTasks(filter = false) {
-  const todoList = document.getElementById("todoList");
-  todoList.innerHTML = "";
+// ====== Utility ======
+function saveTasks() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+function loadTasks() {
+  const data = JSON.parse(localStorage.getItem("tasks")) || [];
+  tasks = data;
+  renderTasks();
+}
 
-  let filteredTasks = tasks;
-  if (filter) {
-    filteredTasks = tasks.filter(task => !task.done);
-  }
+// ====== Toast Notification ======
+function showToast(msg) {
+  const toast = document.createElement("div");
+  toast.className = "toast show";
+  toast.innerText = msg;
+  document.getElementById("toastContainer").appendChild(toast);
 
-  if (filteredTasks.length === 0) {
-    todoList.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-gray-500">No task found</td></tr>`;
+  setTimeout(() => {
+    toast.classList.remove("show");
+    toast.remove();
+  }, 3000);
+}
+
+// ====== Add Task ======
+function addTask() {
+  const title = document.getElementById("taskInput").value.trim();
+  const due = document.getElementById("taskDate").value;
+  const category = document.getElementById("taskCategory").value.trim();
+  const priority = document.getElementById("taskPriority").value;
+
+  if (!title) {
+    showToast("⚠️ Task title is required");
     return;
   }
 
-  filteredTasks.forEach((task, index) => {
-    const row = document.createElement("tr");
-    row.classList.add("border-b", "border-gray-700");
+  const newTask = {
+    id: ++taskIdCounter,
+    title,
+    due,
+    category,
+    priority,
+    status: "Pending",
+    subtasks: []
+  };
 
-    row.innerHTML = `
-      <td class="px-4 py-2">${task.text}</td>
-      <td class="px-4 py-2">${task.date}</td>
-      <td class="px-4 py-2">${task.done ? "✅ Done" : "⏳ Pending"}</td>
-      <td class="px-4 py-2">
-        <button onclick="toggleStatus(${index})" 
-          class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md mr-2">
-          Toggle
-        </button>
-        <button onclick="deleteTask(${index})" 
-          class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-md">
-          Delete
-        </button>
+  tasks.push(newTask);
+  saveTasks();
+  renderTasks();
+  updateStats();
+  showToast("✅ Task added!");
+
+  // reset form
+  document.getElementById("taskInput").value = "";
+  document.getElementById("taskDate").value = "";
+  document.getElementById("taskCategory").value = "";
+  document.getElementById("taskPriority").value = "Medium";
+}
+
+// ====== Delete Task ======
+function deleteTask(id) {
+  const index = tasks.findIndex(t => t.id === id);
+  if (index !== -1) {
+    deletedTask = tasks[index];
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+    updateStats();
+    showToast("🗑️ Task deleted! Undo?");
+
+    // undo option 5s
+    clearTimeout(undoTimeout);
+    undoTimeout = setTimeout(() => {
+      deletedTask = null;
+    }, 5000);
+  }
+}
+
+function undoDelete() {
+  if (deletedTask) {
+    tasks.push(deletedTask);
+    deletedTask = null;
+    saveTasks();
+    renderTasks();
+    updateStats();
+    showToast("↩️ Undo successful");
+  }
+}
+
+// ====== Toggle Complete ======
+function toggleTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (task) {
+    task.status = task.status === "Completed" ? "Pending" : "Completed";
+    saveTasks();
+    renderTasks();
+    updateStats();
+    showToast(`🔄 Task marked ${task.status}`);
+  }
+}
+
+// ====== Render Task List ======
+function renderTasks() {
+  const tbody = document.getElementById("taskBody");
+  tbody.innerHTML = "";
+
+  tasks.forEach(task => {
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-gray-100 dark:hover:bg-gray-700 transition";
+
+    tr.innerHTML = `
+      <td class="p-3 font-semibold">${task.title}</td>
+      <td class="p-3">${task.due || "-"}</td>
+      <td class="p-3">${task.category || "-"}</td>
+      <td class="p-3">
+        <span class="px-2 py-1 rounded text-white ${
+          task.priority === "High" ? "bg-red-500" :
+          task.priority === "Medium" ? "bg-yellow-500" : "bg-green-500"
+        }">${task.priority}</span>
+      </td>
+      <td class="p-3 ${
+        task.status === "Completed" ? "text-green-500" :
+        task.status === "Pending" ? "text-yellow-500" : "text-red-500"
+      }">${task.status}</td>
+      <td class="p-3 flex gap-2">
+        <button class="btn-primary" onclick="toggleTask(${task.id})">✔</button>
+        <button class="btn-dark" onclick="editTask(${task.id})">✏️</button>
+        <button class="btn-danger" onclick="deleteTask(${task.id})">🗑️</button>
       </td>
     `;
-    todoList.appendChild(row);
+
+    tbody.appendChild(tr);
   });
 }
 
-function addTask() {
-  const taskInput = document.getElementById("taskInput");
-  const dateInput = document.getElementById("dateInput");
+// ====== Stats & Progress ======
+function updateStats() {
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.status === "Completed").length;
+  const overdue = tasks.filter(t => t.due && new Date(t.due) < new Date() && t.status !== "Completed").length;
+  const today = tasks.filter(t => t.due && new Date(t.due).toDateString() === new Date().toDateString()).length;
 
-  if (taskInput.value.trim() === "" || dateInput.value === "") {
-    alert("Please enter task and date!");
-    return;
-  }
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statDone").textContent = completed;
+  document.getElementById("statOverdue").textContent = overdue;
+  document.getElementById("statToday").textContent = today;
 
-  tasks.push({
-    text: taskInput.value,
-    date: dateInput.value,
-    done: false
-  });
-
-  taskInput.value = "";
-  dateInput.value = "";
-  renderTasks();
+  const progress = total === 0 ? 0 : (completed / total) * 100;
+  document.getElementById("progressBar").style.width = progress + "%";
+  document.getElementById("progressBar").style.background =
+    "linear-gradient(90deg,#FCBB6D,#DB737F)";
 }
 
-function toggleStatus(index) {
-  tasks[index].done = !tasks[index].done;
-  renderTasks();
+// ====== Dark Mode ======
+function toggleDarkMode() {
+  document.documentElement.classList.toggle("dark");
+  showToast("🌙 Dark mode toggled");
 }
 
-function deleteTask(index) {
-  tasks.splice(index, 1);
-  renderTasks();
-}
+// ====== Init ======
+window.onload = () => {
+  loadTasks();
+  updateStats();
+};
 
-function deleteAll() {
-  if (confirm("Are you sure you want to delete all tasks?")) {
-    tasks = [];
-    renderTasks();
-  }
-}
-
-function filterTasks() {
-  renderTasks(true);
-}
-
-// Initial render
-renderTasks();

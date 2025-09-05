@@ -1,0 +1,206 @@
+/* ==========================
+   Global Styles & Layout
+   ========================== */
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #475C7A, #685D79);
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  transition: background 0.4s ease;
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(to right, #FCBB6D, #DB737F);
+  color: #fff;
+  font-weight: bold;
+  font-size: 2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+/* ==========================
+   Containers
+   ========================== */
+.container {
+  background: #AB6C82;
+  margin: 20px auto;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  max-width: 1200px;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+.container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
+
+/* ==========================
+   Input & Buttons
+   ========================== */
+input, select {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  margin: 5px;
+  outline: none;
+  background: #685D79;
+  color: #fff;
+  transition: background 0.3s;
+}
+input::placeholder {
+  color: #ddd;
+}
+input:focus, select:focus {
+  background: #475C7A;
+}
+
+button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+/* Button Variants */
+.btn-primary {
+  background: linear-gradient(135deg, #DB737F, #FCBB6D);
+  color: #fff;
+}
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(252,187,109,0.4);
+}
+
+.btn-danger {
+  background: #DB737F;
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #AB6C82;
+}
+
+.btn-dark {
+  background: #475C7A;
+  color: #fff;
+}
+.btn-dark:hover {
+  background: #685D79;
+}
+
+/* ==========================
+   Task Cards
+   ========================== */
+.task-card {
+  background: #685D79;
+  margin: 12px 0;
+  padding: 18px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+.task-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+}
+.task-title {
+  font-weight: 600;
+  color: #FCBB6D;
+}
+.task-meta {
+  font-size: 0.9rem;
+  color: #eee;
+}
+
+/* Task Status Colors */
+.status-pending {
+  color: #FCBB6D;
+}
+.status-completed {
+  color: #7ED957;
+}
+.status-overdue {
+  color: #DB737F;
+}
+
+/* ==========================
+   Progress Bar
+   ========================== */
+.progress-container {
+  background: #475C7A;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 16px;
+  margin: 15px 0;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FCBB6D, #DB737F);
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+/* ==========================
+   Toast Notifications
+   ========================== */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #AB6C82;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================
+   Dark Mode
+   ========================== */
+body.dark {
+  background: linear-gradient(135deg, #1e1e2f, #2b2b40);
+}
+body.dark .container {
+  background: #2b2b40;
+}
+body.dark input, body.dark select {
+  background: #3a3a55;
+}
+body.dark .task-card {
+  background: #3a3a55;
+}
+
+footer {
+  
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  text-align: center;
+  background: #AB6C82;
+  color: #000000;
+  padding: 14px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s, transform 0.4s;
+  z-index: 1000;
+}
